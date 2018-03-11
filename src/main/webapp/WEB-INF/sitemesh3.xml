@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sitemesh>
+    <mime-type>text/html</mime-type>
+    <mime-type>application/vnd.wap.xhtml+xml</mime-type>
+    <mime-type>application/xhtml+xml</mime-type>
+
+    <mapping path="/console/*" decorator="/resources/theme/basic.jsp"/>
+    <mapping path="/index" decorator="/resources/theme/basic.jsp"/>
+    <mapping path="/console/dynamic/show" exclue="true"/>
+    <mapping path="/console/login" exclue="true"/>
+</sitemesh>
