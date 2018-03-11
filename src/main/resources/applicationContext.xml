@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--配置文件-->
+    <bean class="com.snh.util.SpringPropertiesUtil">
+        <property name="locations">
+            <list>
+                <!-- 这里支持多种寻址方式：classpath和file -->
+                <value>classpath:mysql.properties</value>
+                <value>classpath:redis.properties</value>
+                <value>classpath:url.properties</value>
+                <value>classpath:log4j.properties</value>
+                <value>classpath:config.properties</value>
+            </list>
+        </property>
+    </bean>
+    <import resource="classpath:spring-mybatis.xml" />
+
+</beans>

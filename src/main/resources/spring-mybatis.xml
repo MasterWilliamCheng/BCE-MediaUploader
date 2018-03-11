@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+     http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+     http://www.springframework.org/schema/context
+     http://www.springframework.org/schema/context/spring-context-3.0.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+        <!-- 基本属性 url、user、password -->
+        <property name="url" value="${mysql.master.jdbcUrl}"/>
+        <property name="username" value="${mysql.jdbcUserName}"/>
+        <property name="password" value="${mysql.jdbcPassword}"/>
+        <!-- 配置初始化大小、最小、最大 -->
+        <property name="initialSize" value="${mysql.initSize}"/>
+        <property name="minIdle" value="1"/>
+        <property name="maxActive" value="20"/>
+        <!-- 配置获取连接等待超时的时间 -->
+        <property name="maxWait" value="60000"/>
+        <!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+        <property name="timeBetweenEvictionRunsMillis" value="60000"/>
+        <!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+        <property name="minEvictableIdleTimeMillis" value="300000"/>
+        <property name="validationQuery" value="SELECT 'x'"/>
+        <property name="testWhileIdle" value="true"/>
+        <property name="testOnBorrow" value="false"/>
+        <property name="testOnReturn" value="false"/>
+        <!-- 打开PSCache，并且指定每个连接上PSCache的大小 -->
+        <property name="poolPreparedStatements" value="true"/>
+        <property name="maxPoolPreparedStatementPerConnectionSize" value="20"/>
+        <!-- 配置监控统计拦截的filters -->
+        <property name="filters" value="stat"/>
+    </bean>
+
+
+    <!-- 配置数据源 -->
+    <!--<bean id="dataSource"-->
+    <!--class="com.mchange.v2.c3p0.ComboPooledDataSource"-->
+    <!--destroy-method="close">-->
+
+    <!--<property name="driverClass" value="${mysql.driverClassName}"/>-->
+    <!--<property name="jdbcUrl" value="${mysql.jdbcUrl}"/>-->
+    <!--<property name="user" value="${mysql.jdbcUserName}"/>-->
+    <!--<property name="password" value="${mysql.jdbcPassword}"/>-->
+
+    <!--&lt;!&ndash;连接池中保留的最小连接数。&ndash;&gt;-->
+    <!--<property name="minPoolSize" value="${mysql.minConn}"/>-->
+
+    <!--&lt;!&ndash;连接池中保留的最大连接数。Default: 15 &ndash;&gt;-->
+    <!--<property name="maxPoolSize" value="${mysql.maxConn}"/>-->
+
+    <!--&lt;!&ndash;初始化时获取的连接数，取值应在minPoolSize与maxPoolSize之间。Default: 3 &ndash;&gt;-->
+    <!--<property name="initialPoolSize" value="${mysql.initSize}"/>-->
+
+    <!--&lt;!&ndash;最大空闲时间,60秒内未使用则连接被丢弃。若为0则永不丢弃。Default: 0 &ndash;&gt;-->
+    <!--<property name="maxIdleTime" value="${mysql.maxIdleTime}"/>-->
+
+    <!--&lt;!&ndash;当连接池中的连接耗尽的时候c3p0一次同时获取的连接数。Default: 3 &ndash;&gt;-->
+    <!--<property name="acquireIncrement" value="${mysql.acquireIncrement}"/>-->
+
+    <!--&lt;!&ndash;JDBC的标准参数，用以控制数据源内加载的PreparedStatements数量。但由于预缓存的statements-->
+    <!--属于单个connection而不是整个连接池。所以设置这个参数需要考虑到多方面的因素。-->
+    <!--如果maxStatements与maxStatementsPerConnection均为0，则缓存被关闭。Default: 0&ndash;&gt;-->
+    <!--<property name="maxStatements" value="${mysql.maxStatements}"/>-->
+    <!--<property name="maxStatementsPerConnection" value="0"/>-->
+
+    <!--&lt;!&ndash;每60秒检查所有连接池中的空闲连接。Default: 0 &ndash;&gt;-->
+    <!--<property name="idleConnectionTestPeriod" value="${mysql.idleConnectionTestPeriod}"/>-->
+
+    <!--&lt;!&ndash;定义在从数据库获取新连接失败后重复尝试的次数。Default: 30 &ndash;&gt;-->
+    <!--<property name="acquireRetryAttempts" value="${mysql.acquireRetryAttempts}"/>-->
+
+    <!--&lt;!&ndash;获取连接失败将会引起所有等待连接池来获取连接的线程抛出异常。但是数据源仍有效-->
+    <!--保留，并在下次调用getConnection()的时候继续尝试获取连接。如果设为true，那么在尝试-->
+    <!--获取连接失败后该数据源将申明已断开并永久关闭。Default: false&ndash;&gt;-->
+    <!--<property name="breakAfterAcquireFailure" value="${mysql.breakAfterAcquireFailure}"/>-->
+
+    <!--&lt;!&ndash;因性能消耗大请只在需要的时候使用它。如果设为true那么在每个connection提交的-->
+    <!--时候都将校验其有效性。建议使用idleConnectionTestPeriod或automaticTestTable-->
+    <!--等方法来提升连接测试的性能。Default: false &ndash;&gt;-->
+    <!--<property name="testConnectionOnCheckout" value="${mysql.testConnectionOnCheckout}"/>-->
+    <!--</bean>-->
+
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <!--<property name="configLocation" value="classpath:mybatis-config.xml"/>-->
+        <property name="typeAliasesPackage" value="com.snh.entity"/>
+        <property name="configLocation" value="classpath:/mybatis-config.xml"/>
+        <property name="mapperLocations" value="classpath*:com/snh/dao/mapper/*.xml"/>
+    </bean>
+
+    <bean id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+        <constructor-arg index="0" ref="sqlSessionFactory"/>
+    </bean>
+
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <tx:annotation-driven proxy-target-class="false" transaction-manager="transactionManager"/>
+
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.snh.dao"/>
+        <!--<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>-->
+        <!--<property name="sqlSessionTemplateBeanName" value="sqlSessionTemplate"/>-->
+    </bean>
+
+    <!-- 配置Jdbc模板  -->
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!-- 配置Jdbc模板  -->
+    <bean id="parameterJdbcTemplate" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
+        <constructor-arg ref="dataSource"/>
+    </bean>
+
+
+</beans>

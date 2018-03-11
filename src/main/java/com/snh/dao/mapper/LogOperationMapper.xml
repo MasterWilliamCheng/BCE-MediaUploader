@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.snh.dao.LogOperationMapper" >
+  <resultMap id="BaseResultMap" type="com.snh.entity.LogOperation" >
+    <id column="log_id" property="logId" jdbcType="BIGINT" />
+    <result column="resource_key" property="resourceKey" jdbcType="VARCHAR" />
+    <result column="user_id" property="userId" jdbcType="BIGINT" />
+    <result column="ctime" property="ctime" jdbcType="TIMESTAMP" />
+    <result column="type" property="type" jdbcType="INTEGER" />
+    <result column="is_valid" property="isValid" jdbcType="BIT" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    log_id, resource_key, user_id, ctime, type, is_valid
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from log_operation
+    where log_id = #{logId,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from log_operation
+    where log_id = #{logId,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.snh.entity.LogOperation" >
+    insert into log_operation (log_id, resource_key, user_id, 
+      ctime, type, is_valid)
+    values (#{logId,jdbcType=BIGINT}, #{resourceKey,jdbcType=VARCHAR}, #{userId,jdbcType=BIGINT}, 
+      #{ctime,jdbcType=TIMESTAMP}, #{type,jdbcType=INTEGER}, #{isValid,jdbcType=BIT})
+  </insert>
+  <insert id="insertSelective" parameterType="com.snh.entity.LogOperation" >
+    insert into log_operation
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="logId != null" >
+        log_id,
+      </if>
+      <if test="resourceKey != null" >
+        resource_key,
+      </if>
+      <if test="userId != null" >
+        user_id,
+      </if>
+      <if test="ctime != null" >
+        ctime,
+      </if>
+      <if test="type != null" >
+        type,
+      </if>
+      <if test="isValid != null" >
+        is_valid,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="logId != null" >
+        #{logId,jdbcType=BIGINT},
+      </if>
+      <if test="resourceKey != null" >
+        #{resourceKey,jdbcType=VARCHAR},
+      </if>
+      <if test="userId != null" >
+        #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="ctime != null" >
+        #{ctime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=INTEGER},
+      </if>
+      <if test="isValid != null" >
+        #{isValid,jdbcType=BIT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.snh.entity.LogOperation" >
+    update log_operation
+    <set >
+      <if test="resourceKey != null" >
+        resource_key = #{resourceKey,jdbcType=VARCHAR},
+      </if>
+      <if test="userId != null" >
+        user_id = #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="ctime != null" >
+        ctime = #{ctime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="type != null" >
+        type = #{type,jdbcType=INTEGER},
+      </if>
+      <if test="isValid != null" >
+        is_valid = #{isValid,jdbcType=BIT},
+      </if>
+    </set>
+    where log_id = #{logId,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.snh.entity.LogOperation" >
+    update log_operation
+    set resource_key = #{resourceKey,jdbcType=VARCHAR},
+      user_id = #{userId,jdbcType=BIGINT},
+      ctime = #{ctime,jdbcType=TIMESTAMP},
+      type = #{type,jdbcType=INTEGER},
+      is_valid = #{isValid,jdbcType=BIT}
+    where log_id = #{logId,jdbcType=BIGINT}
+  </update>
+
+  <select id="selectLogOperationList" resultType="com.snh.entity.LogOperationParams">
+    select
+    l.ctime date,l.type type,d.staffname nickName,d.headimgurl headimgurl,d.group_id groupId,d.depname depName,r.resource_name resourceName
+    from log_operation l LEFT JOIN data_user d on l.user_id = d.user_id LEFT JOIN data_resource r on l.resource_key = r.object_key
+    where l.is_valid = 1 order by l.ctime DESC
+  </select>
+</mapper>

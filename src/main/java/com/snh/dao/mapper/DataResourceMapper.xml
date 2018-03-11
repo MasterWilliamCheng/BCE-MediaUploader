@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.snh.dao.DataResourceMapper" >
+  <resultMap id="BaseResultMap" type="com.snh.entity.DataResource" >
+    <id column="r_id" property="rId" jdbcType="BIGINT" />
+    <result column="object_key" property="objectKey" jdbcType="VARCHAR" />
+    <result column="resource_name" property="resourceName" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="size" property="size" jdbcType="VARCHAR" />
+    <result column="duration" property="duration" jdbcType="VARCHAR" />
+    <result column="type" property="type" jdbcType="INTEGER" />
+    <result column="ctime" property="ctime" jdbcType="TIMESTAMP" />
+    <result column="owner" property="owner" jdbcType="VARCHAR" />
+    <result column="owner_id" property="ownerId" jdbcType="BIGINT" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    r_id, object_key, resource_name, status, size,duration, type,ctime,owner,owner_id
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from data_resource
+    where r_id = #{rId,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from data_resource
+    where r_id = #{rId,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.snh.entity.DataResource" >
+    insert into data_resource (r_id, object_key, resource_name,
+      status, size,duration, type,ctime,owner,owner_id)
+    values (#{rId,jdbcType=BIGINT}, #{objectKey,jdbcType=VARCHAR}, #{resourceName,jdbcType=VARCHAR},
+      #{status,jdbcType=INTEGER}, #{size,jdbcType=VARCHAR},#{duration,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER},#{ctime,jdbcType=TIMESTAMP},#{owner,jdbcType=VARCHAR},#{ownerId,jdbcType=BIGINT})
+  </insert>
+  <insert id="insertSelective" parameterType="com.snh.entity.DataResource" >
+    insert into data_resource
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="rId != null" >
+        r_id,
+      </if>
+      <if test="objectKey != null" >
+        object_key,
+      </if>
+      <if test="resourceName != null" >
+        resource_name,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="size != null" >
+        size,
+      </if>
+      <if test="duration != null" >
+        duration,
+      </if>
+      <if test="type != null" >
+        type,
+      </if>
+      <if test="ctime != null" >
+        ctime,
+      </if>
+      <if test="owner != null" >
+        owner,
+      </if>
+      <if test="ownerId != null" >
+        owner_id
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="rId != null" >
+        #{rId,jdbcType=BIGINT},
+      </if>
+      <if test="objectKey != null" >
+        #{objectKey,jdbcType=VARCHAR},
+      </if>
+      <if test="resourceName != null" >
+        #{resourceName,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="size != null" >
+        #{size,jdbcType=VARCHAR},
+      </if>
+      <if test="duration != null" >
+        #{duration,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=INTEGER},
+      </if>
+      <if test="ctime != null" >
+        #{ctime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="owner != null" >
+        #{owner,jdbcType=VARCHAR},
+      </if>
+      <if test="ownerId != null" >
+        #{ownerId,jdbcType=BIGINT}
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.snh.entity.DataResource" >
+    update data_resource
+    <set >
+      <if test="objectKey != null" >
+        object_key = #{objectKey,jdbcType=VARCHAR},
+      </if>
+      <if test="resourceName != null" >
+        resource_name = #{resourceName,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="size != null" >
+        size = #{size,jdbcType=VARCHAR},
+      </if>
+      <if test="duration != null" >
+        duration = #{duration,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null" >
+        type = #{type,jdbcType=INTEGER},
+      </if>
+      <if test="ctime != null" >
+        ctime = #{ctime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="owner != null" >
+        owner = #{owner,jdbcType=VARCHAR},
+      </if>
+      <if test="ownerId != null" >
+        owner_id = #{ownerId,jdbcType=BIGINT}
+      </if>
+    </set>
+    where r_id = #{rId,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.snh.entity.DataResource" >
+    update data_resource
+    set object_key = #{objectKey,jdbcType=VARCHAR},
+      resource_name = #{resourceName,jdbcType=VARCHAR},
+      status = #{status,jdbcType=INTEGER},
+      size = #{size,jdbcType=VARCHAR},
+      duration = #{duration,jdbcType=VARCHAR},
+      type = #{type,jdbcType=INTEGER},
+      ctime = #{ctime,jdbcType=TIMESTAMP},
+      owner = #{owner,jdbcType=TIMESTAMP},
+      owner_id = #{ownerId,jdbcType=BIGINT}
+    where r_id = #{rId,jdbcType=BIGINT}
+  </update>
+
+  <!-- 自定义sql -->
+  <select id="selectVideoList" resultMap="BaseResultMap" >
+    select
+    <include refid="Base_Column_List" />
+    from data_resource
+    where (TYPE = 1 OR TYPE =0) and status != 0
+    <if test="rname != null and rname != ''" >
+      and resource_name LIKE CONCAT('%','${rname}','%')
+    </if>
+    <if test="owner != null and owner != ''" >
+      and owner LIKE CONCAT('%','${owner}','%')
+    </if>
+    order by r_id desc
+  </select>
+  <select id="selectDocList" resultMap="BaseResultMap" >
+    select
+    <include refid="Base_Column_List" />
+    from data_resource
+    where TYPE = 2 and status != 0 order by r_id desc
+  </select>
+  <select id="selectPicList" resultMap="BaseResultMap" >
+    select
+    <include refid="Base_Column_List" />
+    from data_resource
+    where TYPE = 3 and status != 0
+    <if test="rname != null and rname != ''" >
+    and resource_name LIKE CONCAT('%','${rname}','%')
+  </if>
+    <if test="owner != null and owner != ''" >
+      and owner LIKE CONCAT('%','${owner}','%')
+    </if>
+    order by r_id desc
+  </select>
+  <update id="deleteResourceByPrimaryKey" parameterType="java.lang.Long">
+    update data_resource
+    set status = 0
+    where r_id = #{rId,jdbcType=BIGINT}
+  </update>
+  <select id="selectMediaStatus" resultMap="BaseResultMap" >
+    select
+    <include refid="Base_Column_List" />
+    from data_resource
+    where object_key = #{objectKey,jdbcType=VARCHAR} limit 1
+  </select>
+</mapper>

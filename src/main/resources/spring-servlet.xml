@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context-4.0.xsd
+       http://www.springframework.org/schema/mvc
+       http://www.springframework.org/schema/mvc/spring-mvc.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <context:component-scan base-package="com.snh.controller"/>
+    <context:component-scan base-package="com.snh.service"/>
+
+    <!-- 启动@AspectJ支持 -->
+    <aop:aspectj-autoproxy/>
+
+    <mvc:annotation-driven>
+        <mvc:message-converters register-defaults="true">
+            <!--指定返回值编码为UTF-8-->
+            <bean class="org.springframework.http.converter.StringHttpMessageConverter">
+                <constructor-arg name="defaultCharset" value="utf-8"/>
+                <property name="supportedMediaTypes" value="text/plain;charset=utf-8"/>
+            </bean>
+            <!--这里不是用spring默认的MappingJackson2HttpMessageConverter解析-->
+            <!--改为使用GsonHttpMessageConverter解析-->
+
+            <bean id="gsonHttpMessageConverter"
+                  class="org.springframework.http.converter.json.GsonHttpMessageConverter">
+                <property name="defaultCharset" value="utf-8"/>
+                <property name="gson">
+                    <bean class="com.google.gson.Gson"/>
+                </property>
+                <!--加入支持的媒体类型，返回contentType-->
+                <property name="supportedMediaTypes">
+                    <list>
+                        <!--这里顺序不能反，一定要先写text/html，不然IE下会出现下载提示-->
+                        <value>text/html;charset=UTF-8</value>
+                        <value>application/json;charset=UTF-8</value>
+                        <value>text/javascript;charset=UTF-8</value>
+                    </list>
+                </property>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/console/*"/>
+            <mvc:mapping path="/index"/>
+            <mvc:mapping path="/player"/>
+            <bean class="com.snh.interceptor.SystemUserInterceptor"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
+
+
+
+
+
+    <!--静态资源-->
+    <mvc:resources mapping="/resources/**" location="/resources/"/>
+    <mvc:resources mapping="/admin/**" location="/admin/"/>
+
+    <!-- 配置JSP视图 -->
+    <mvc:view-resolvers>
+        <mvc:jsp prefix="/WEB-INF/views/" suffix=".jsp" view-class="org.springframework.web.servlet.view.JstlView"/>
+    </mvc:view-resolvers>
+
+
+</beans>
