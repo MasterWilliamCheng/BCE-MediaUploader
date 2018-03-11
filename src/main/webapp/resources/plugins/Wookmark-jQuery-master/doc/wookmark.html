@@ -1,0 +1,1968 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>wookmark.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>wookmark.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-comment">/*!
+  Wookmark plugin
+  @name wookmark.js
+  @author Christoph Ono (chri@sto.ph or @gbks)
+  @author Sebastian Helzle (me@helzle.it or @sebobo)
+  @version 2.1.2
+  @date 05/05/2016
+  @category jQuery plugin
+  @copyright (c) 2009-2016 Christoph Ono (www.wookmark.com)
+  @license Licensed under the MIT (http://www.opensource.org/licenses/mit-license.php) license.
+*/</span>
+<span class="hljs-comment">/*global define, window, jQuery*/</span>
+<span class="hljs-comment">/*jslint plusplus: true, bitwise: true */</span>
+(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(factory)</span> </span>{
+  <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> define === <span class="hljs-string">'function'</span> &amp;&amp; define.amd) {
+    define([<span class="hljs-string">'window'</span>, <span class="hljs-string">'document'</span>], factory);
+  } <span class="hljs-keyword">else</span> {
+    factory(<span class="hljs-built_in">window</span>, <span class="hljs-built_in">document</span>);
+  }
+}(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(window, document)</span> </span>{</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <h2 id="wookmark-default-options">Wookmark default options</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> defaultOptions = {
+    align: <span class="hljs-string">'center'</span>,
+    autoResize: <span class="hljs-literal">true</span>,
+    comparator: <span class="hljs-literal">null</span>,
+    direction: <span class="hljs-literal">undefined</span>,
+    ignoreInactiveItems: <span class="hljs-literal">true</span>,
+    inactiveClass: <span class="hljs-string">'wookmark-inactive'</span>,
+    itemSelector: <span class="hljs-literal">undefined</span>,
+    itemWidth: <span class="hljs-number">0</span>,
+    fillEmptySpace: <span class="hljs-literal">false</span>,
+    flexibleWidth: <span class="hljs-number">0</span>,
+    offset: <span class="hljs-number">5</span>,
+    outerOffset: <span class="hljs-number">0</span>,
+    onLayoutChanged: <span class="hljs-literal">undefined</span>,
+    placeholderClass: <span class="hljs-string">'wookmark-placeholder'</span>,
+    possibleFilters: [],
+    resizeDelay: <span class="hljs-number">50</span>,
+    verticalOffset: <span class="hljs-literal">undefined</span>
+  };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <h2 id="helper-functions">Helper functions</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>Bind function to set the context for the Wookmark instance function</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__bind</span><span class="hljs-params">(fn, me)</span> </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+      <span class="hljs-keyword">return</span> fn.apply(me, <span class="hljs-built_in">arguments</span>);
+    };
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>Function for executing css writes to dom on the next animation frame if supported</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> executeNextFrame = <span class="hljs-built_in">window</span>.requestAnimationFrame || <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(callback)</span> </span>{ callback(); };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>Update multiple css values on an object</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setCSS</span><span class="hljs-params">(el, properties)</span> </span>{
+    <span class="hljs-keyword">var</span> key;
+    <span class="hljs-keyword">for</span> (key <span class="hljs-keyword">in</span> properties) {
+      <span class="hljs-keyword">if</span> (properties.hasOwnProperty(key)) {
+        el.style[key] = properties[key];
+      }
+    }
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>Update the css properties of multiple elements at the same time
+befor the browsers next animation frame.
+The parameter <code>data</code> has to be an array containing objects, each
+with the element and the desired css properties.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">bulkUpdateCSS</span><span class="hljs-params">(data, callback)</span> </span>{
+    executeNextFrame(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+      <span class="hljs-keyword">var</span> i, item;
+      <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; data.length; i++) {
+        item = data[i];
+        setCSS(item.el, item.css);
+      }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p>Run optional callback</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> callback === <span class="hljs-string">'function'</span>) {
+        executeNextFrame(callback);
+      }
+    });
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p>Remove whitespace around filter names</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">cleanFilterName</span><span class="hljs-params">(filterName)</span> </span>{
+    <span class="hljs-keyword">return</span> filterName.replace(<span class="hljs-regexp">/^\s+|\s+$/g</span>, <span class="hljs-string">''</span>).toLowerCase();
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p>Remove listener from an element (IE8 compatible)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">removeEventListener</span><span class="hljs-params">(el, eventName, handler)</span> </span>{
+    <span class="hljs-keyword">if</span> (<span class="hljs-built_in">window</span>.jQuery) {
+      $(el).off(eventName, handler);
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (el.removeEventListener) {
+      el.removeEventListener(eventName, handler);
+    } <span class="hljs-keyword">else</span> {
+      el.detachEvent(<span class="hljs-string">'on'</span> + eventName, handler);
+    }
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <p>Add listener to an element (IE8 compatible)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">addEventListener</span><span class="hljs-params">(el, eventName, handler)</span> </span>{
+    removeEventListener(el, eventName, handler);
+
+    <span class="hljs-keyword">if</span> (<span class="hljs-built_in">window</span>.jQuery) {
+      $(el).on(eventName, handler);
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (el.addEventListener) {
+      el.addEventListener(eventName, handler);
+    } <span class="hljs-keyword">else</span> {
+      el.attachEvent(<span class="hljs-string">'on'</span> + eventName, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+        handler.call(el);
+      });
+    }
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <p>Checks if element <code>el</code> is not visible in the browser</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">isHidden</span><span class="hljs-params">(el)</span> </span>{
+    <span class="hljs-keyword">return</span> el.offsetParent === <span class="hljs-literal">null</span>;
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-15">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+              <p>Returns the elements height without margin</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getHeight</span><span class="hljs-params">(el)</span> </span>{
+    <span class="hljs-keyword">return</span> el.offsetHeight;
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-16">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <p>Returns the elements width without margin</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getWidth</span><span class="hljs-params">(el)</span> </span>{
+    <span class="hljs-keyword">return</span> el.offsetWidth;
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-17">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+              <p>Return true if element has class</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">hasClass</span><span class="hljs-params">(el, className)</span> </span>{
+    <span class="hljs-keyword">if</span> (el.classList) {
+      <span class="hljs-keyword">return</span> el.classList.contains(className);
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">RegExp</span>(<span class="hljs-string">'(^| )'</span> + className + <span class="hljs-string">'( |$)'</span>, <span class="hljs-string">'gi'</span>).test(el.className);
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-18">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-18">&#182;</a>
+              </div>
+              <p>Add class to element (IE8+)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">addClass</span><span class="hljs-params">(el, className)</span> </span>{
+    <span class="hljs-keyword">if</span> (el.classList) {
+      el.classList.add(className);
+    } <span class="hljs-keyword">else</span> {
+      el.className += <span class="hljs-string">' '</span> + className;
+    }
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-19">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-19">&#182;</a>
+              </div>
+              <p>Remove class from element (IE8+)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">removeClass</span><span class="hljs-params">(el, className)</span> </span>{
+    <span class="hljs-keyword">if</span> (el.classList) {
+      el.classList.remove(className);
+    } <span class="hljs-keyword">else</span> {
+      el.className = el.className.replace(<span class="hljs-keyword">new</span> <span class="hljs-built_in">RegExp</span>(<span class="hljs-string">'(^|\\b)'</span> + className.split(<span class="hljs-string">' '</span>).join(<span class="hljs-string">'|'</span>) + <span class="hljs-string">'(\\b|$)'</span>, <span class="hljs-string">'gi'</span>), <span class="hljs-string">' '</span>);
+    }
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-20">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-20">&#182;</a>
+              </div>
+              <p>Get value of specified data attribute</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getData</span><span class="hljs-params">(el, attr, isInt, prefix)</span> </span>{
+    <span class="hljs-keyword">if</span> (prefix === <span class="hljs-literal">undefined</span>) {
+      prefix = <span class="hljs-string">'wookmark-'</span>;
+    }
+    <span class="hljs-keyword">var</span> val = el.getAttribute(<span class="hljs-string">'data-'</span> + prefix + attr);
+    <span class="hljs-keyword">if</span> (isInt === <span class="hljs-literal">true</span>) {
+      <span class="hljs-keyword">return</span> <span class="hljs-built_in">parseInt</span>(val, <span class="hljs-number">10</span>);
+    }
+    <span class="hljs-keyword">return</span> val;
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-21">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-21">&#182;</a>
+              </div>
+              <p>Set value of specified data attribute</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setData</span><span class="hljs-params">(el, attr, val, prefix)</span> </span>{
+    <span class="hljs-keyword">if</span> (prefix === <span class="hljs-literal">undefined</span>) {
+      prefix = <span class="hljs-string">'wookmark-'</span>;
+    }
+    el.setAttribute(<span class="hljs-string">'data-'</span> + prefix + attr, val);
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-22">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-22">&#182;</a>
+              </div>
+              <p>Remove duplicates from given array</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">removeDuplicates</span><span class="hljs-params">(items)</span> </span>{
+    <span class="hljs-keyword">var</span> temp = {}, result = [], x, i = items.length;
+    <span class="hljs-keyword">while</span> (i--) {
+      x = getData(items[i], <span class="hljs-string">'id'</span>, <span class="hljs-literal">true</span>);
+      <span class="hljs-keyword">if</span> (!temp.hasOwnProperty(x)) {
+        temp[x] = <span class="hljs-number">1</span>;
+        result.push(items[i]);
+      }
+    }
+    <span class="hljs-keyword">return</span> result;
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-23">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-23">&#182;</a>
+              </div>
+              <p>Get the computed style from an element (IE 8 compatible)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getStyle</span><span class="hljs-params">(el, prop)</span> </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">window</span>.getComputedStyle !== <span class="hljs-literal">undefined</span> ? <span class="hljs-built_in">window</span>.getComputedStyle(el, <span class="hljs-literal">null</span>).getPropertyValue(prop) : el.currentStyle[prop];
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-24">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-24">&#182;</a>
+              </div>
+              <p>IE 8 compatible indexOf</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">indexOf</span><span class="hljs-params">(items, item)</span> </span>{
+    <span class="hljs-keyword">var</span> len = items.length, i;
+    <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; len; i++) {
+      <span class="hljs-keyword">if</span> (items[i] === item) {
+        <span class="hljs-keyword">return</span> i;
+      }
+    }
+    <span class="hljs-keyword">return</span> -<span class="hljs-number">1</span>;
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-25">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-25">&#182;</a>
+              </div>
+              <h2 id="main-wookmark-plugin-class">Main wookmark plugin class</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-26">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-26">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Wookmark</span><span class="hljs-params">(container, options)</span> </span>{
+    options = options || {};
+
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> container === <span class="hljs-string">'string'</span>) {
+      container = <span class="hljs-built_in">document</span>.querySelector(container);
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-27">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-27">&#182;</a>
+              </div>
+              <p>Instance variables.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">this</span>.container = container;
+    <span class="hljs-keyword">this</span>.columns = <span class="hljs-keyword">this</span>.resizeTimer = <span class="hljs-literal">null</span>;
+    <span class="hljs-keyword">this</span>.activeItemCount = <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">this</span>.placeholders = [];
+    <span class="hljs-keyword">this</span>.itemHeightsInitialized = <span class="hljs-literal">false</span>;
+    <span class="hljs-keyword">this</span>.itemHeightsDirty = <span class="hljs-literal">false</span>;
+    <span class="hljs-keyword">this</span>.elementTag = <span class="hljs-string">'div'</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-28">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-28">&#182;</a>
+              </div>
+              <p>Bind instance methods</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">this</span>.initItems = __bind(<span class="hljs-keyword">this</span>.initItems, <span class="hljs-keyword">this</span>);
+    <span class="hljs-keyword">this</span>.updateOptions = __bind(<span class="hljs-keyword">this</span>.updateOptions, <span class="hljs-keyword">this</span>);
+    <span class="hljs-keyword">this</span>.onResize = __bind(<span class="hljs-keyword">this</span>.onResize, <span class="hljs-keyword">this</span>);
+    <span class="hljs-keyword">this</span>.onRefresh = __bind(<span class="hljs-keyword">this</span>.onRefresh, <span class="hljs-keyword">this</span>);
+    <span class="hljs-keyword">this</span>.getItemWidth = __bind(<span class="hljs-keyword">this</span>.getItemWidth, <span class="hljs-keyword">this</span>);
+    <span class="hljs-keyword">this</span>.layout = __bind(<span class="hljs-keyword">this</span>.layout, <span class="hljs-keyword">this</span>);
+    <span class="hljs-keyword">this</span>.layoutFull = __bind(<span class="hljs-keyword">this</span>.layoutFull, <span class="hljs-keyword">this</span>);
+    <span class="hljs-keyword">this</span>.layoutColumns = __bind(<span class="hljs-keyword">this</span>.layoutColumns, <span class="hljs-keyword">this</span>);
+    <span class="hljs-keyword">this</span>.filter = __bind(<span class="hljs-keyword">this</span>.filter, <span class="hljs-keyword">this</span>);
+    <span class="hljs-keyword">this</span>.clear = __bind(<span class="hljs-keyword">this</span>.clear, <span class="hljs-keyword">this</span>);
+    <span class="hljs-keyword">this</span>.getActiveItems = __bind(<span class="hljs-keyword">this</span>.getActiveItems, <span class="hljs-keyword">this</span>);
+    <span class="hljs-keyword">this</span>.refreshPlaceholders = __bind(<span class="hljs-keyword">this</span>.refreshPlaceholders, <span class="hljs-keyword">this</span>);
+    <span class="hljs-keyword">this</span>.sortElements = __bind(<span class="hljs-keyword">this</span>.sortElements, <span class="hljs-keyword">this</span>);
+    <span class="hljs-keyword">this</span>.updateFilterClasses = __bind(<span class="hljs-keyword">this</span>.updateFilterClasses, <span class="hljs-keyword">this</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-29">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-29">&#182;</a>
+              </div>
+              <p>Initialize children of the container</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">this</span>.initItems();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-30">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-30">&#182;</a>
+              </div>
+              <p>Initial update and layout</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">this</span>.container.style.display = <span class="hljs-string">'block'</span>;
+    <span class="hljs-keyword">this</span>.updateOptions(options);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-31">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-31">&#182;</a>
+              </div>
+              <p>Collect filter classes after items have been initialized</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">this</span>.updateFilterClasses();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-32">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-32">&#182;</a>
+              </div>
+              <p>Listen to resize event of the browser if enabled</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.autoResize) {
+      addEventListener(<span class="hljs-built_in">window</span>, <span class="hljs-string">'resize'</span>, <span class="hljs-keyword">this</span>.onResize);
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-33">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-33">&#182;</a>
+              </div>
+              <p>Listen to external refresh event</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    addEventListener(<span class="hljs-keyword">this</span>.container, <span class="hljs-string">'refreshWookmark'</span>, <span class="hljs-keyword">this</span>.onRefresh);
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-34">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-34">&#182;</a>
+              </div>
+              <p>Get all valid children of the container object and store them</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  Wookmark.prototype.initItems = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-35">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-35">&#182;</a>
+              </div>
+              <p>By select all children of the container if no selector is specified</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.itemSelector === <span class="hljs-literal">undefined</span>) {
+      <span class="hljs-keyword">var</span> items = [], child, children = <span class="hljs-keyword">this</span>.container.children,
+          i = children.length;
+      <span class="hljs-keyword">while</span> (i--) {
+        child = children[i];</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-36">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-36">&#182;</a>
+              </div>
+              <p>Skip comment nodes on IE8</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">if</span> (child.nodeType !== <span class="hljs-number">8</span>) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-37">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-37">&#182;</a>
+              </div>
+              <p>Show item</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>          child.style.display = <span class="hljs-string">''</span>;
+          setData(child, <span class="hljs-string">'id'</span>, i);
+          items.unshift(child);
+        }
+      }
+      <span class="hljs-keyword">this</span>.items = items;
+    } <span class="hljs-keyword">else</span> {
+      <span class="hljs-keyword">this</span>.items = <span class="hljs-keyword">this</span>.container.querySelectorAll(<span class="hljs-keyword">this</span>.itemSelector);
+    }
+
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.items.length) {
+      <span class="hljs-keyword">this</span>.elementTag = <span class="hljs-keyword">this</span>.items[<span class="hljs-number">0</span>].tagName;
+    }
+    <span class="hljs-keyword">this</span>.itemHeightsDirty = <span class="hljs-literal">true</span>;
+  };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-38">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-38">&#182;</a>
+              </div>
+              <p>Reload all filter classes from all items and cache them</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  Wookmark.prototype.updateFilterClasses = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-39">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-39">&#182;</a>
+              </div>
+              <p>Collect filter data</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">var</span> i = <span class="hljs-keyword">this</span>.items.length, j, filterClasses = {}, itemFilterClasses,
+      item, filterClass, possibleFilters = <span class="hljs-keyword">this</span>.possibleFilters,
+      k = possibleFilters.length, possibleFilter;
+
+    <span class="hljs-keyword">while</span> (i--) {
+      item = <span class="hljs-keyword">this</span>.items[i];</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-40">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-40">&#182;</a>
+              </div>
+              <p>Read filter classes and globally store each filter class as object and the fitting items in the array</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      itemFilterClasses = <span class="hljs-built_in">JSON</span>.parse(getData(item, <span class="hljs-string">'filter-class'</span>, <span class="hljs-literal">false</span>, <span class="hljs-string">''</span>));
+      <span class="hljs-keyword">if</span> (itemFilterClasses &amp;&amp; <span class="hljs-keyword">typeof</span> itemFilterClasses === <span class="hljs-string">'object'</span>) {
+        j = itemFilterClasses.length;
+        <span class="hljs-keyword">while</span> (j--) {
+          filterClass = cleanFilterName(itemFilterClasses[j]);
+          <span class="hljs-keyword">if</span> (!filterClasses.hasOwnProperty(filterClass)) {
+            filterClasses[filterClass] = [];
+          }
+          filterClasses[filterClass].push(item);
+        }
+      }
+    }
+
+    <span class="hljs-keyword">while</span> (k--) {
+      possibleFilter = cleanFilterName(possibleFilters[k]);
+      <span class="hljs-keyword">if</span> (!filterClasses.hasOwnProperty(possibleFilter)) {
+        filterClasses[possibleFilter] = [];
+      }
+    }
+
+    <span class="hljs-keyword">this</span>.filterClasses = filterClasses;
+  };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-41">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-41">&#182;</a>
+              </div>
+              <p>Method for updating the plugins options</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  Wookmark.prototype.updateOptions = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(options)</span> </span>{
+    <span class="hljs-keyword">var</span> key;
+    <span class="hljs-keyword">this</span>.itemHeightsDirty = <span class="hljs-literal">true</span>;
+    options = options || {};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-42">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-42">&#182;</a>
+              </div>
+              <p>Overwrite non existing instance variables with the ones from options or the defaults</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">for</span> (key <span class="hljs-keyword">in</span> defaultOptions) {
+      <span class="hljs-keyword">if</span> (defaultOptions.hasOwnProperty(key)) {
+        <span class="hljs-keyword">if</span> (options.hasOwnProperty(key)) {
+          <span class="hljs-keyword">this</span>[key] = options[key];
+        } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (!<span class="hljs-keyword">this</span>.hasOwnProperty(key)) {
+          <span class="hljs-keyword">this</span>[key] = defaultOptions[key];
+        }
+      }
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-43">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-43">&#182;</a>
+              </div>
+              <p>Vertical offset uses a fallback to offset</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">this</span>.verticalOffset = <span class="hljs-keyword">this</span>.verticalOffset || <span class="hljs-keyword">this</span>.offset;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-44">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-44">&#182;</a>
+              </div>
+              <p>Update layout so changes apply</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">this</span>.layout(<span class="hljs-literal">true</span>);
+  };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-45">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-45">&#182;</a>
+              </div>
+              <p>This timer ensures that layout is not continuously called as window is being dragged.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  Wookmark.prototype.onResize = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+    clearTimeout(<span class="hljs-keyword">this</span>.resizeTimer);
+    <span class="hljs-keyword">this</span>.itemHeightsDirty = <span class="hljs-keyword">this</span>.flexibleWidth !== <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">this</span>.resizeTimer = setTimeout(<span class="hljs-keyword">this</span>.layout, <span class="hljs-keyword">this</span>.resizeDelay);
+  };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-46">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-46">&#182;</a>
+              </div>
+              <p>Marks the items heights as dirty and does a relayout</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  Wookmark.prototype.onRefresh = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+    <span class="hljs-keyword">this</span>.itemHeightsDirty = <span class="hljs-literal">true</span>;
+    <span class="hljs-keyword">this</span>.layout();
+  };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-47">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-47">&#182;</a>
+              </div>
+              <p>Filters the active items with the given string filters.
+@param filters array of string
+@param mode ‘or’ or ‘and’</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  Wookmark.prototype.filter = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(filters, mode, dryRun)</span> </span>{
+    <span class="hljs-keyword">var</span> activeFilters = [], activeFiltersLength, activeItems = [],
+      i, j, k, filter;
+
+    filters = filters || [];
+    mode = mode || <span class="hljs-string">'or'</span>;
+    dryRun = dryRun || <span class="hljs-literal">false</span>;
+
+    <span class="hljs-keyword">if</span> (filters.length) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-48">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-48">&#182;</a>
+              </div>
+              <p>Collect active filters</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; filters.length; i++) {
+        filter = cleanFilterName(filters[i]);
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.filterClasses.hasOwnProperty(filter)) {
+          activeFilters.push(<span class="hljs-keyword">this</span>.filterClasses[filter]);
+        }
+      }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-49">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-49">&#182;</a>
+              </div>
+              <p>Get items for active filters with the selected mode</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      i = activeFiltersLength = activeFilters.length;
+      <span class="hljs-keyword">if</span> (mode === <span class="hljs-string">'or'</span> || activeFiltersLength === <span class="hljs-number">1</span>) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-50">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-50">&#182;</a>
+              </div>
+              <p>Set all items in all active filters active</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">while</span> (i--) {
+          activeItems = activeItems.concat(activeFilters[i]);
+        }
+      } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (mode === <span class="hljs-string">'and'</span>) {
+        <span class="hljs-keyword">var</span> shortestFilter = activeFilters[<span class="hljs-number">0</span>], itemValid = <span class="hljs-literal">true</span>,
+          foundInFilter, currentItem, currentFilter;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-51">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-51">&#182;</a>
+              </div>
+              <p>Find shortest filter class</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">while</span> (i--) {
+          <span class="hljs-keyword">if</span> (activeFilters[i].length &lt; shortestFilter.length) {
+            shortestFilter = activeFilters[i];
+          }
+        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-52">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-52">&#182;</a>
+              </div>
+              <p>Iterate over shortest filter and find elements in other filter classes</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        shortestFilter = shortestFilter || [];
+        i = shortestFilter.length;
+        <span class="hljs-keyword">while</span> (i--) {
+          currentItem = shortestFilter[i];
+          j = activeFiltersLength;
+          itemValid = <span class="hljs-literal">true</span>;
+
+          <span class="hljs-keyword">while</span> (j-- &amp;&amp; itemValid) {
+            currentFilter = activeFilters[j];
+            <span class="hljs-keyword">if</span> (shortestFilter !== currentFilter) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-53">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-53">&#182;</a>
+              </div>
+              <p>Search for current item in each active filter class</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>              foundInFilter = <span class="hljs-literal">false</span>;
+              k = currentFilter.length;
+              <span class="hljs-keyword">while</span> (k-- &amp;&amp; !foundInFilter) {
+                foundInFilter = currentFilter[k] === currentItem;
+              }
+              itemValid &amp;= foundInFilter;
+            }
+          }
+
+          <span class="hljs-keyword">if</span> (itemValid) {
+            activeItems = activeItems.concat(shortestFilter[i]);
+          }
+        }
+      }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-54">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-54">&#182;</a>
+              </div>
+              <p>Remove duplicates from active items</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">if</span> (activeFiltersLength &gt; <span class="hljs-number">1</span>) {
+        activeItems = removeDuplicates(activeItems);
+      }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-55">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-55">&#182;</a>
+              </div>
+              <p>Hide inactive items</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">if</span> (!dryRun) {
+        i = <span class="hljs-keyword">this</span>.items.length;
+        <span class="hljs-keyword">while</span> (i--) {
+          <span class="hljs-keyword">if</span> (indexOf(activeItems, <span class="hljs-keyword">this</span>.items[i]) === -<span class="hljs-number">1</span>) {
+            addClass(<span class="hljs-keyword">this</span>.items[i], <span class="hljs-keyword">this</span>.inactiveClass);
+          }
+        }
+      }
+    } <span class="hljs-keyword">else</span> {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-56">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-56">&#182;</a>
+              </div>
+              <p>Show all items if no filter is selected</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      activeItems = <span class="hljs-keyword">this</span>.items;
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-57">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-57">&#182;</a>
+              </div>
+              <p>Show active items</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span> (!dryRun) {
+      i = activeItems.length;
+      <span class="hljs-keyword">while</span> (i--) {
+        removeClass(activeItems[i], <span class="hljs-keyword">this</span>.inactiveClass);
+      }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-58">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-58">&#182;</a>
+              </div>
+              <p>Unset columns and refresh grid for a full layout</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">this</span>.columns = <span class="hljs-literal">null</span>;
+      <span class="hljs-keyword">this</span>.layout();
+    }
+    <span class="hljs-keyword">return</span> activeItems;
+  };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-59">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-59">&#182;</a>
+              </div>
+              <p>Creates or updates existing placeholders to create columns of even height</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  Wookmark.prototype.refreshPlaceholders = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(columnWidth, sideOffset)</span> </span>{
+    <span class="hljs-keyword">var</span> i,
+      containerHeight = getHeight(<span class="hljs-keyword">this</span>.container),
+      columnsLength = <span class="hljs-keyword">this</span>.columns.length,
+      column,
+      height,
+      innerOffset,
+      lastColumnItem,
+      placeholdersHtml = <span class="hljs-string">''</span>,
+      placeholder,
+      top;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-60">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-60">&#182;</a>
+              </div>
+              <p>Add more placeholders if necessary</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.placeholders.length &lt; columnsLength) {
+      <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; columnsLength - <span class="hljs-keyword">this</span>.placeholders.length; i++) {
+        placeholdersHtml += <span class="hljs-string">'&lt;'</span> + <span class="hljs-keyword">this</span>.elementTag + <span class="hljs-string">' class="'</span> + <span class="hljs-keyword">this</span>.placeholderClass + <span class="hljs-string">'"/&gt;'</span>;
+      }
+      <span class="hljs-keyword">this</span>.container.insertAdjacentHTML(<span class="hljs-string">'beforeend'</span>, placeholdersHtml);
+      <span class="hljs-keyword">this</span>.placeholders = <span class="hljs-keyword">this</span>.container.querySelectorAll(<span class="hljs-string">'.'</span> + <span class="hljs-keyword">this</span>.placeholderClass);
+    }
+
+    innerOffset = (<span class="hljs-keyword">this</span>.offset + <span class="hljs-built_in">parseInt</span>(getStyle(<span class="hljs-keyword">this</span>.placeholders[<span class="hljs-number">0</span>], <span class="hljs-string">'border-left-width'</span>), <span class="hljs-number">10</span>) * <span class="hljs-number">2</span>) || <span class="hljs-number">0</span>;
+    innerOffset += (<span class="hljs-built_in">parseInt</span>(getStyle(<span class="hljs-keyword">this</span>.placeholders[<span class="hljs-number">0</span>], <span class="hljs-string">'padding-left'</span>), <span class="hljs-number">10</span>) * <span class="hljs-number">2</span>)  || <span class="hljs-number">0</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-61">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-61">&#182;</a>
+              </div>
+              <p>Update each placeholder</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-keyword">this</span>.placeholders.length; i++) {
+      placeholder = <span class="hljs-keyword">this</span>.placeholders[i];
+      column = <span class="hljs-keyword">this</span>.columns[i];
+
+      <span class="hljs-keyword">if</span> (i &gt;= columnsLength || column.length === <span class="hljs-number">0</span>) {
+        placeholder.style.display = <span class="hljs-string">'none'</span>;
+      } <span class="hljs-keyword">else</span> {
+        lastColumnItem = column[column.length - <span class="hljs-number">1</span>];
+        top = getData(lastColumnItem, <span class="hljs-string">'top'</span>, <span class="hljs-literal">true</span>) + getData(lastColumnItem, <span class="hljs-string">'height'</span>, <span class="hljs-literal">true</span>) + <span class="hljs-keyword">this</span>.verticalOffset;
+        height = <span class="hljs-built_in">Math</span>.max(<span class="hljs-number">0</span>, containerHeight - top - innerOffset);
+
+        setCSS(placeholder, {
+          position: <span class="hljs-string">'absolute'</span>,
+          display: height &gt; <span class="hljs-number">0</span> ? <span class="hljs-string">'block'</span> : <span class="hljs-string">'none'</span>,
+          left: (i * columnWidth + sideOffset) + <span class="hljs-string">'px'</span>,
+          top: top + <span class="hljs-string">'px'</span>,
+          width: (columnWidth - innerOffset) + <span class="hljs-string">'px'</span>,
+          height: height + <span class="hljs-string">'px'</span>
+        });
+      }
+    }
+  };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-62">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-62">&#182;</a>
+              </div>
+              <p>Method the get active items which are not disabled and visible</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  Wookmark.prototype.getActiveItems = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+    <span class="hljs-keyword">var</span> inactiveClass = <span class="hljs-keyword">this</span>.inactiveClass,
+      i,
+      result = [],
+      item,
+      items = <span class="hljs-keyword">this</span>.items;
+
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.ignoreInactiveItems) {
+      <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; items.length; i++) {
+        item = items[i];
+        <span class="hljs-keyword">if</span> (!hasClass(item, inactiveClass)) {
+          result.push(item);
+        }
+      }
+    } <span class="hljs-keyword">else</span> {
+      <span class="hljs-keyword">return</span> items;
+    }
+    <span class="hljs-keyword">return</span> result;
+  };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-63">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-63">&#182;</a>
+              </div>
+              <p>Method to get the standard item width</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  Wookmark.prototype.getItemWidth = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+    <span class="hljs-keyword">var</span> itemWidth = <span class="hljs-keyword">this</span>.itemWidth,
+      innerWidth = getWidth(<span class="hljs-keyword">this</span>.container) - <span class="hljs-number">2</span> * <span class="hljs-keyword">this</span>.outerOffset,
+      flexibleWidth = <span class="hljs-keyword">this</span>.flexibleWidth;
+
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> itemWidth === <span class="hljs-string">'function'</span>) {
+      itemWidth = <span class="hljs-keyword">this</span>.itemWidth();
+    }
+
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.items.length &gt; <span class="hljs-number">0</span> &amp;&amp; (itemWidth === <span class="hljs-literal">undefined</span> || (itemWidth === <span class="hljs-number">0</span> &amp;&amp; !<span class="hljs-keyword">this</span>.flexibleWidth))) {
+      itemWidth = getWidth(<span class="hljs-keyword">this</span>.items[<span class="hljs-number">0</span>]);
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> itemWidth === <span class="hljs-string">'string'</span> &amp;&amp; itemWidth.indexOf(<span class="hljs-string">'%'</span>) &gt;= <span class="hljs-number">0</span>) {
+      itemWidth = <span class="hljs-built_in">parseFloat</span>(itemWidth) / <span class="hljs-number">100</span> * innerWidth;
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-64">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-64">&#182;</a>
+              </div>
+              <p>Calculate flexible item width if option is set</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span> (flexibleWidth) {
+      <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> flexibleWidth === <span class="hljs-string">'function'</span>) {
+        flexibleWidth = flexibleWidth();
+      }
+
+      <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> flexibleWidth === <span class="hljs-string">'string'</span> &amp;&amp; flexibleWidth.indexOf(<span class="hljs-string">'%'</span>) &gt;= <span class="hljs-number">0</span>) {
+        flexibleWidth = <span class="hljs-built_in">parseFloat</span>(flexibleWidth) / <span class="hljs-number">100</span> * innerWidth;
+      }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-65">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-65">&#182;</a>
+              </div>
+              <p>Find highest column count</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">var</span> paddedInnerWidth = (innerWidth + <span class="hljs-keyword">this</span>.offset),
+        flexibleColumns = <span class="hljs-built_in">Math</span>.floor(<span class="hljs-number">0.5</span> + paddedInnerWidth / (flexibleWidth + <span class="hljs-keyword">this</span>.offset)),
+        fixedColumns = <span class="hljs-built_in">Math</span>.floor(paddedInnerWidth / (itemWidth + <span class="hljs-keyword">this</span>.offset)),
+        columns = <span class="hljs-built_in">Math</span>.max(flexibleColumns, fixedColumns),
+        columnWidth = <span class="hljs-built_in">Math</span>.min(flexibleWidth, <span class="hljs-built_in">Math</span>.floor((innerWidth - (columns - <span class="hljs-number">1</span>) * <span class="hljs-keyword">this</span>.offset) / columns));
+
+      itemWidth = <span class="hljs-built_in">Math</span>.max(itemWidth, columnWidth);
+    }
+
+    <span class="hljs-keyword">return</span> itemWidth;
+  };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-66">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-66">&#182;</a>
+              </div>
+              <p>Main layout method.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  Wookmark.prototype.layout = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(force, callback)</span> </span>{</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-67">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-67">&#182;</a>
+              </div>
+              <p>Do nothing if container isn’t visible</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span> (!force &amp;&amp; isHidden(<span class="hljs-keyword">this</span>.container)) { <span class="hljs-keyword">return</span>; }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-68">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-68">&#182;</a>
+              </div>
+              <p>Calculate basic layout parameters.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">var</span> calculatedItemWidth = <span class="hljs-keyword">this</span>.getItemWidth(),
+      columnWidth = calculatedItemWidth + <span class="hljs-keyword">this</span>.offset,
+      containerWidth = getWidth(<span class="hljs-keyword">this</span>.container),
+      innerWidth = containerWidth - <span class="hljs-number">2</span> * <span class="hljs-keyword">this</span>.outerOffset,
+      columns = <span class="hljs-built_in">Math</span>.floor((innerWidth + <span class="hljs-keyword">this</span>.offset) / columnWidth),
+      offset,
+      maxHeight = <span class="hljs-number">0</span>,
+      activeItems = <span class="hljs-keyword">this</span>.getActiveItems(),
+      activeItemsLength = activeItems.length,
+      item;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-69">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-69">&#182;</a>
+              </div>
+              <p>Cache item heights</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span> (force || <span class="hljs-keyword">this</span>.itemHeightsDirty || !<span class="hljs-keyword">this</span>.itemHeightsInitialized) {
+      <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; activeItemsLength; i++) {
+        item = activeItems[i];
+
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.flexibleWidth) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-70">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-70">&#182;</a>
+              </div>
+              <p>Stretch items to fill calculated width</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>          item.style.width = calculatedItemWidth + <span class="hljs-string">'px'</span>;
+        }
+        setData(item, <span class="hljs-string">'height'</span>, item.offsetHeight);
+      }
+      <span class="hljs-keyword">this</span>.itemHeightsDirty = <span class="hljs-literal">false</span>;
+      <span class="hljs-keyword">this</span>.itemHeightsInitialized = <span class="hljs-literal">true</span>;
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-71">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-71">&#182;</a>
+              </div>
+              <p>Use less columns if there are to few items</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    columns = <span class="hljs-built_in">Math</span>.max(<span class="hljs-number">1</span>, <span class="hljs-built_in">Math</span>.min(columns, activeItemsLength));</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-72">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-72">&#182;</a>
+              </div>
+              <p>Calculate the offset based on the alignment of columns to the parent container</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    offset = <span class="hljs-keyword">this</span>.outerOffset;
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.align === <span class="hljs-string">'center'</span>) {
+      offset += <span class="hljs-built_in">Math</span>.floor(<span class="hljs-number">0.5</span> + (innerWidth - (columns * columnWidth - <span class="hljs-keyword">this</span>.offset)) &gt;&gt; <span class="hljs-number">1</span>);
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-73">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-73">&#182;</a>
+              </div>
+              <p>Get direction for positioning</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">this</span>.direction = <span class="hljs-keyword">this</span>.direction || (<span class="hljs-keyword">this</span>.align === <span class="hljs-string">'right'</span> ? <span class="hljs-string">'right'</span> : <span class="hljs-string">'left'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-74">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-74">&#182;</a>
+              </div>
+              <p>If container and column count hasn’t changed, we can only update the columns.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span> (!force &amp;&amp; <span class="hljs-keyword">this</span>.columns !== <span class="hljs-literal">null</span> &amp;&amp; <span class="hljs-keyword">this</span>.columns.length === columns &amp;&amp; <span class="hljs-keyword">this</span>.activeItemCount === activeItemsLength) {
+      maxHeight = <span class="hljs-keyword">this</span>.layoutColumns(columnWidth, offset);
+    } <span class="hljs-keyword">else</span> {
+      maxHeight = <span class="hljs-keyword">this</span>.layoutFull(columnWidth, columns, offset);
+    }
+    <span class="hljs-keyword">this</span>.activeItemCount = activeItemsLength;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-75">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-75">&#182;</a>
+              </div>
+              <p>Set container height to height of the grid.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">this</span>.container.style.height = maxHeight + <span class="hljs-string">'px'</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-76">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-76">&#182;</a>
+              </div>
+              <p>Update placeholders</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.fillEmptySpace) {
+      <span class="hljs-keyword">this</span>.refreshPlaceholders(columnWidth, offset);
+    }
+
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.onLayoutChanged !== <span class="hljs-literal">undefined</span> &amp;&amp; <span class="hljs-keyword">typeof</span> <span class="hljs-keyword">this</span>.onLayoutChanged === <span class="hljs-string">'function'</span>) {
+      <span class="hljs-keyword">this</span>.onLayoutChanged();
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-77">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-77">&#182;</a>
+              </div>
+              <p>Run optional callback</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> callback === <span class="hljs-string">'function'</span>) {
+      callback();
+    }
+  };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-78">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-78">&#182;</a>
+              </div>
+              <p>Sort elements with configurable comparator</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  Wookmark.prototype.sortElements = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(elements)</span> </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">typeof</span> <span class="hljs-keyword">this</span>.comparator === <span class="hljs-string">'function'</span> ? elements.sort(<span class="hljs-keyword">this</span>.comparator) : elements;
+  };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-79">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-79">&#182;</a>
+              </div>
+              <p>Perform a full layout update.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  Wookmark.prototype.layoutFull = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(columnWidth, columns, offset)</span> </span>{
+    <span class="hljs-keyword">var</span> item, k = <span class="hljs-number">0</span>, i = <span class="hljs-number">0</span>, activeItems, activeItemCount, shortest = <span class="hljs-literal">null</span>, shortestIndex = <span class="hljs-literal">null</span>,
+        sideOffset, heights = [], itemBulkCSS = [], leftAligned = <span class="hljs-keyword">this</span>.align === <span class="hljs-string">'left'</span>, self = <span class="hljs-keyword">this</span>;
+
+    <span class="hljs-keyword">this</span>.columns = [];</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-80">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-80">&#182;</a>
+              </div>
+              <p>Sort elements before layouting</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    activeItems = <span class="hljs-keyword">this</span>.sortElements(<span class="hljs-keyword">this</span>.getActiveItems());
+    activeItemCount = activeItems.length;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-81">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-81">&#182;</a>
+              </div>
+              <p>Prepare arrays to store height of columns and items.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">while</span> (heights.length &lt; columns) {
+      heights.push(<span class="hljs-keyword">this</span>.outerOffset);
+      <span class="hljs-keyword">this</span>.columns.push([]);
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-82">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-82">&#182;</a>
+              </div>
+              <p>Loop over items.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">while</span> (i &lt; activeItemCount) {
+      item = activeItems[i];</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-83">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-83">&#182;</a>
+              </div>
+              <p>Find the shortest column.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      shortest = heights[<span class="hljs-number">0</span>];
+      shortestIndex = <span class="hljs-number">0</span>;
+      <span class="hljs-keyword">for</span> (k = <span class="hljs-number">0</span>; k &lt; columns; k++) {
+        <span class="hljs-keyword">if</span> (heights[k] &lt; shortest) {
+          shortest = heights[k];
+          shortestIndex = k;
+        }
+      }
+      setData(item, <span class="hljs-string">'top'</span>, shortest);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-84">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-84">&#182;</a>
+              </div>
+              <p>stick to left side if alignment is left and this is the first column</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      sideOffset = offset;
+      <span class="hljs-keyword">if</span> (shortestIndex &gt; <span class="hljs-number">0</span> || !leftAligned) {
+        sideOffset += shortestIndex * columnWidth;
+      }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-85">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-85">&#182;</a>
+              </div>
+              <p>Position the item.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      itemBulkCSS[i] = {
+        el: item,
+        css: {
+          position: <span class="hljs-string">'absolute'</span>,
+          top: shortest + <span class="hljs-string">'px'</span>
+        }
+      };
+      itemBulkCSS[i].css[<span class="hljs-keyword">this</span>.direction] = sideOffset + <span class="hljs-string">'px'</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-86">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-86">&#182;</a>
+              </div>
+              <p>Update column height and store item in shortest column</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      heights[shortestIndex] += getData(item, <span class="hljs-string">'height'</span>, <span class="hljs-literal">true</span>) + <span class="hljs-keyword">this</span>.verticalOffset;
+      <span class="hljs-keyword">this</span>.columns[shortestIndex].push(item);
+      i++;
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-87">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-87">&#182;</a>
+              </div>
+              <p>Update all css in the next frame and mark container as initalised</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    bulkUpdateCSS(itemBulkCSS, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-88">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-88">&#182;</a>
+              </div>
+              <p>Initialisation done</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">if</span> (!hasClass(self.container, <span class="hljs-string">'wookmark-initialised'</span>)) {
+        addClass(self.container, <span class="hljs-string">'wookmark-initialised'</span>);
+      }
+    });</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-89">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-89">&#182;</a>
+              </div>
+              <p>Return longest column</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">return</span> <span class="hljs-built_in">Math</span>.max.apply(<span class="hljs-built_in">Math</span>, heights);
+  };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-90">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-90">&#182;</a>
+              </div>
+              <p>This layout method only updates the vertical position of the
+existing column assignments.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  Wookmark.prototype.layoutColumns = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(columnWidth, offset)</span> </span>{
+    <span class="hljs-keyword">var</span> heights = [], itemBulkCSS = [], k = <span class="hljs-number">0</span>, j = <span class="hljs-number">0</span>,
+      i = <span class="hljs-keyword">this</span>.columns.length, currentHeight,
+      column, item, sideOffset;
+
+    <span class="hljs-keyword">while</span> (i--) {
+      currentHeight = <span class="hljs-keyword">this</span>.outerOffset;
+      heights.push(currentHeight);
+      column = <span class="hljs-keyword">this</span>.columns[i];
+      sideOffset = i * columnWidth + offset;
+
+      <span class="hljs-keyword">for</span> (k = <span class="hljs-number">0</span>; k &lt; column.length; k++, j++) {
+        item = column[k];
+        setData(item, <span class="hljs-string">'top'</span>, currentHeight);
+        itemBulkCSS[j] = {
+          el: item,
+          css: {
+            top: currentHeight + <span class="hljs-string">'px'</span>
+          }
+        };
+        itemBulkCSS[j].css[<span class="hljs-keyword">this</span>.direction] = sideOffset + <span class="hljs-string">'px'</span>;
+
+        currentHeight += getData(item, <span class="hljs-string">'height'</span>, <span class="hljs-literal">true</span>) + <span class="hljs-keyword">this</span>.verticalOffset;
+      }
+      heights[i] = currentHeight;
+    }
+
+    bulkUpdateCSS(itemBulkCSS);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-91">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-91">&#182;</a>
+              </div>
+              <p>Return longest column</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">return</span> <span class="hljs-built_in">Math</span>.max.apply(<span class="hljs-built_in">Math</span>, heights);
+  };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-92">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-92">&#182;</a>
+              </div>
+              <p>Clear event listeners and time outs and the instance itself</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  Wookmark.prototype.clear = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+    clearTimeout(<span class="hljs-keyword">this</span>.resizeTimer);
+    <span class="hljs-keyword">var</span> i = <span class="hljs-keyword">this</span>.placeholders.length;
+    <span class="hljs-keyword">while</span> (i--) {
+      <span class="hljs-keyword">this</span>.container.removeChild(<span class="hljs-keyword">this</span>.placeholders[i]);
+    }
+    removeEventListener(<span class="hljs-built_in">window</span>, <span class="hljs-string">'resize'</span>, <span class="hljs-keyword">this</span>.onResize);
+    removeEventListener(<span class="hljs-keyword">this</span>.container, <span class="hljs-string">'refreshWookmark'</span>, <span class="hljs-keyword">this</span>.onRefresh);
+  };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-93">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-93">&#182;</a>
+              </div>
+              <p>Register as jQuery plugin if jQuery is loaded</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">if</span> (<span class="hljs-built_in">window</span>.jQuery !== <span class="hljs-literal">undefined</span>) {
+    jQuery.fn.wookmark = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(options)</span> </span>{
+      <span class="hljs-keyword">var</span> i = <span class="hljs-keyword">this</span>.length;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-94">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-94">&#182;</a>
+              </div>
+              <p>Use first element if container is an jQuery object</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">if</span> (options !== <span class="hljs-literal">undefined</span> &amp;&amp; options.container <span class="hljs-keyword">instanceof</span> jQuery) {
+        options.container = options.container[<span class="hljs-number">0</span>];
+      }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-95">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-95">&#182;</a>
+              </div>
+              <p>Call plugin multiple times if there are multiple elements selected</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">if</span> (i &gt; <span class="hljs-number">1</span>) {
+        <span class="hljs-keyword">while</span> (i--) {
+          $(<span class="hljs-keyword">this</span>).eq(i).wookmark(options);
+        }
+      } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (i === <span class="hljs-number">1</span>) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-96">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-96">&#182;</a>
+              </div>
+              <p>Create a wookmark instance or update an existing one</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">if</span> (!<span class="hljs-keyword">this</span>.wookmarkInstance) {
+          <span class="hljs-keyword">this</span>.wookmarkInstance = <span class="hljs-keyword">new</span> Wookmark(<span class="hljs-keyword">this</span>[<span class="hljs-number">0</span>], options || {});
+        } <span class="hljs-keyword">else</span> {
+          <span class="hljs-keyword">this</span>.wookmarkInstance.updateOptions(options || {});
+        }
+      }
+      <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+    };
+  }
+
+  <span class="hljs-built_in">window</span>.Wookmark = Wookmark;
+  <span class="hljs-keyword">return</span> Wookmark;
+}));</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>
